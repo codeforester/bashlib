@@ -24,9 +24,6 @@ To use or contribute to this project, you'll need:
 - **bats-core** — for test execution  
   https://github.com/bats-core/bats-core
 
-- **shellcheck** *(optional but highly recommended)* — for static analysis  
-  https://www.shellcheck.net/
-
 - **git** — for managing the repository and test dependencies
 
 ---
@@ -39,3 +36,7 @@ To use or contribute to this project, you'll need:
    git clone https://github.com/<your-username>/bashlib.git
    cd bashlib
 
+## 📚 References
+
+- **BashFAQ**
+  https://mywiki.wooledge.org/BashFAQ

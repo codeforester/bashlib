@@ -11,6 +11,7 @@
 ###     - Error handling and stack tracing
 ###     - Bash version checking
 ###     - Library importing
+###     - Assertions, safe wrappers for common commands
 ###     - Miscellaneous helpers
 ###
 
@@ -29,7 +30,7 @@ __stdlib_sourced__=1
 #
 readonly __script_args__=("$@")
 __new_args__=()
-readonly __SCRIPT_DIR__=$(cd -- "$(dirname -- "${BASH_SOURCE[1]}" )" &>/dev/null && pwd -P)
+readonly __SCRIPT_DIR__=$(cd -- "$(dirname -- "${BASH_SOURCE[1]}")" &>/dev/null && pwd -P)
 
 ############################################ BASH VERSION CHECKER #######################################################
 
@@ -195,7 +196,7 @@ __stdlib_init__() {
 import() {
     local lib
     local push=0
-    for lib; do
+    for lib in "$@"; do
         # Unless an absolute library path is given, make it relative to the script's location
         if [[ "$lib" != /* ]]; then
            [[ $__SCRIPT_DIR__ ]] || { printf '%s\n' "ERROR: __SCRIPT_DIR__ not set; import functionality needs it" >&2; exit 1; }
@@ -243,7 +244,7 @@ add_to_path() {
 
     shift $((OPTIND-1))
 
-    for dir; do
+    for dir in "$@"; do
         ((strict)) && [[ ! -d $dir ]] && continue
         IFS=: read -ra path_dirs <<< "$PATH"
         for path_dir in "${path_dirs[@]}"; do
@@ -642,7 +643,7 @@ safe_mkdir() {
         shift
         p="-p"
     fi
-    for dir; do
+    for dir in "$@"; do
         [[ -d "$dir" ]] && continue
         mkdir $p -- "$dir"
         (($?)) && failed_dirs+=("$dir")
@@ -674,7 +675,7 @@ safe_touch() {
         return 0
     fi
 
-    for file; do
+    for file in "$@"; do
         if ! touch "$file" 2>/dev/null; then
             failed_files+=("$file")
         fi
@@ -710,7 +711,7 @@ safe_truncate() {
         return 0
     fi
 
-    for file; do
+    for file in "$@"; do
         # The > redirection is the simplest way to truncate a file.
         # We redirect stderr to /dev/null to suppress system error messages,
         # as we will provide our own comprehensive error message.
@@ -862,7 +863,7 @@ assert_command_exists() {
         return 0
     fi
 
-    for cmd; do
+    for cmd in "$@"; do
         if ! command -v "$cmd" >/dev/null 2>&1; then
             missing_commands+=("$cmd")
         fi
@@ -897,7 +898,7 @@ assert_file_exists() {
         return 0
     fi
 
-    for file; do
+    for file in "$@"; do
         if [[ ! -f "$file" ]]; then
             missing_files+=("$file")
         fi
@@ -932,7 +933,7 @@ assert_dir_exists() {
         return 0
     fi
 
-    for dir;  do
+    for dir in "$@";  do
         if [[ ! -d "$dir" ]]; then
             missing_dirs+=("$dir")
         fi
@@ -975,7 +976,7 @@ base_cd_nonfatal() {
 safe_unalias() {
     # Ref: https://stackoverflow.com/a/61471333/6862601
     local alias_name
-    for alias_name; do
+    for alias_name in "$@"; do
         [[ ${BASH_ALIASES[$alias_name]} ]] && unalias "$alias_name"
     done
     return 0

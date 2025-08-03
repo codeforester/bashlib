@@ -34,6 +34,12 @@ EOF
     chmod +x main.sh
 }
 
+# The teardown() function runs after each individual test.
+teardown() {
+    # Clean up the temporary wrapper script created in setup().
+    rm -f main.sh
+}
+
 # --- LOGGING TESTS ---
 
 @test "Logging: log_info should produce output" {
